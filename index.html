@@ -16,7 +16,6 @@
             padding: 0;
         }
         body {
-            /* Cartesian grid background */
             background-color: #fbfbfb;
             background-image: 
                 linear-gradient(to right, rgba(214, 51, 132, 0.04) 1px, transparent 1px),
@@ -27,7 +26,7 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            overflow-x: hidden;
+            overflow: hidden;
         }
         /* Mathematical Axis Lines */
         .axis-x {
@@ -82,7 +81,6 @@
         .input-group {
             margin: 25px 0;
         }
-        /* Interactive Inputs */
         .math-input {
             width: 100px;
             padding: 10px;
@@ -94,7 +92,6 @@
             font-family: 'Courier New', monospace;
             color: #d63384;
             font-weight: bold;
-            transition: border-color 0.3s;
         }
         .math-input:focus {
             outline: none;
@@ -116,32 +113,141 @@
             background-color: #b01a5f;
             transform: translateY(-2px);
         }
-        /* Hidden Message Board */
+
+        /* --- EXCITING 5-SECOND MATH ANIMATION OVERLAY --- */
+        #mathLoader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #0d0107;
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #ff8fa3;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+        }
+        #mathLoader::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background-image: 
+                linear-gradient(rgba(214, 51, 132, 0.15) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(214, 51, 132, 0.15) 1px, transparent 1px);
+            background-size: 40px 40px;
+            transform: rotate(15deg);
+            animation: gridMove 20s linear infinite;
+            z-index: 1;
+        }
+        @keyframes gridMove {
+            0% { transform: translate(-50%, -50%) rotate(15deg); }
+            100% { transform: translate(-45%, -45%) rotate(15deg); }
+        }
+        .scanning-laser {
+            position: absolute;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to right, transparent, #ff4d6d, transparent);
+            box-shadow: 0 0 15px #ff4d6d;
+            animation: scan 2.5s ease-in-out infinite;
+            z-index: 2;
+        }
+        @keyframes scan {
+            0% { top: 0%; }
+            50% { top: 100%; }
+            100% { top: 0%; }
+        }
+        .loader-content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            background: rgba(13, 1, 7, 0.85);
+            padding: 30px;
+            border-radius: 16px;
+            border: 1px solid #ff4d6d;
+            max-width: 420px;
+            width: 90%;
+        }
+        .status-terminal {
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+            color: #ffd166;
+            text-shadow: 0 0 5px rgba(255, 209, 102, 0.5);
+            height: 24px;
+        }
+        .progress-box {
+            width: 100%;
+            height: 12px;
+            background: #250212;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid #ff758f;
+        }
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #ff4d6d, #ffd166);
+            box-shadow: 0 0 8px #ff4d6d;
+            transition: width 0.1s linear;
+        }
+        /* Floating math entities */
+        .math-drift {
+            position: absolute;
+            color: rgba(255, 117, 143, 0.25);
+            font-size: 1.1rem;
+            pointer-events: none;
+            z-index: 2;
+            white-space: nowrap;
+        }
+
+        /* --- SECRET MASSIVE HEART SECTION --- */
         #secretMessage {
             display: none;
             opacity: 0;
             transition: opacity 1.2s ease-in-out;
         }
-        /* Gigantic mathematical concept heart */
-        .giant-heart-container {
+        /* Centering container for the heart shape and centered 19 */
+        .giant-heart-wrapper {
             position: relative;
-            width: 220px;
-            height: 220px;
-            margin: 20px auto;
+            width: 240px;
+            height: 240px;
+            margin: 25px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .heart-svg {
             width: 100%;
             height: 100%;
+            filter: drop-shadow(0 0 12px rgba(255, 77, 109, 0.4));
             animation: heartBeat 1.4s infinite;
         }
         @keyframes heartBeat {
             0% { transform: scale(1); }
-            14% { transform: scale(1.12); }
+            14% { transform: scale(1.08); }
             28% { transform: scale(1); }
-            42% { transform: scale(1.12); }
+            42% { transform: scale(1.08); }
             70% { transform: scale(1); }
         }
-        /* Math typographic styling for Title */
+        /* ABSOLUTELY PERFECTED CENTERING FOR "19" INSIDE HEART */
+        .heart-text-overlay {
+            position: absolute;
+            top: 45%; /* Anchored at the perfect visual center of the heart lobes */
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3.2rem;
+            font-weight: 900;
+            color: #ffffff;
+            font-family: 'Cambria', serif;
+            text-shadow: 2px 2px 8px rgba(176, 26, 95, 0.6);
+            z-index: 20;
+            pointer-events: none;
+        }
         .math-title {
             font-size: 1.4rem;
             margin: 20px 0;
@@ -175,12 +281,27 @@
     <div class="axis-x"></div>
     <div class="axis-y"></div>
 
+    <!-- Quantum Math Computation Screen (5s Animation) -->
+    <div id="mathLoader">
+        <div class="scanning-laser"></div>
+        <div class="loader-content">
+            <h3 style="margin-bottom: 15px; letter-spacing: 2px;">RUNNING MATRIX</h3>
+            <div class="status-terminal" id="loaderStatus">Initializing calculation system...</div>
+            <div class="progress-box">
+                <div class="progress-fill" id="loaderBar"></div>
+            </div>
+            <div style="margin-top: 15px; font-size: 0.75rem; color: #ff758f; opacity: 0.8;">
+                [ x = 19 ] DETECTED. SOLVING ALL REALITY VARIABLES.
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Card -->
     <div class="container" id="cardContainer">
         <div id="puzzle-area">
             <h1>An Elegant Proof of Love</h1>
             <p class="subtitle">Evaluate the system to solve for the golden variable \(x\):</p>
             
-            <!-- Beautiful romantic definite integral problem resulting in 19 -->
             <div class="equation-box">
                 $$f(x) = 3x - \int_{0}^{2} 6t \, dt$$
                 <p style="font-size: 0.9rem; color: #666; margin: 10px 0;">If the system reaches equilibrium at:</p>
@@ -197,37 +318,23 @@
 
         <!-- The Secret Birthday Message -->
         <div id="secretMessage">
-            <!-- Gigantic Heart Filled with Math Concepts & Equations -->
-            <div class="giant-heart-container">
+            <!-- Gigantic Perfectly Centered Heart Box -->
+            <div class="giant-heart-wrapper">
                 <svg class="heart-svg" viewBox="0 0 32 29.6">
                     <defs>
-                        <!-- A rich pattern of tiny mathematical expressions filling the heart shape -->
-                        <pattern id="mathPattern" width="100" height="100" patternUnits="userSpaceOnUse">
-                            <rect width="100" height="100" fill="#ffccd5"/>
-                            <text x="5" y="15" font-size="7" font-weight="bold" fill="#ff4d6d">19</text>
-                            <text x="35" y="12" font-size="6" fill="#ff758f">e=mc²</text>
-                            <text x="75" y="18" font-size="8" fill="#ff4d6d">∞</text>
-                            <text x="15" y="32" font-size="7" fill="#ff8fa3">x²+y²=1</text>
-                            <text x="60" y="30" font-size="8" font-weight="bold" fill="#ff4d6d">19</text>
-                            <text x="10" y="48" font-size="6" fill="#ff758f">∑</text>
-                            <text x="35" y="46" font-size="7" fill="#ff4d6d">∫f(x)</text>
-                            <text x="70" y="48" font-size="6" fill="#ff8fa3">lim</text>
-                            <text x="5" y="65" font-size="8" fill="#ff4d6d">π</text>
-                            <text x="45" y="62" font-size="7" font-weight="bold" fill="#ff4d6d">19</text>
-                            <text x="75" y="65" font-size="6" fill="#ff758f">f(t)</text>
-                            <text x="20" y="80" font-size="7" fill="#ff8fa3">dy/dx</text>
-                            <text x="55" y="82" font-size="8" fill="#ff4d6d">√19</text>
-                            <text x="15" y="95" font-size="6" fill="#ff758f">log(x)</text>
-                            <text x="70" y="92" font-size="7" fill="#ff4d6d">sin(θ)</text>
-                        </pattern>
+                        <linearGradient id="heartGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#ff758f" />
+                            <stop offset="50%" stop-color="#ff4d6d" />
+                            <stop offset="100%" stop-color="#c9184a" />
+                        </linearGradient>
                     </defs>
-                    <!-- Heart vector painted with the math formula pattern -->
-                    <path fill="url(#mathPattern)" stroke="#ff4d6d" stroke-width="0.5" d="M23.6,0c-3.4,0-6.3,2.7-7.6,5.6C14.7,2.7,11.8,0,8.4,0C3.8,0,0,3.8,0,8.4c0,9.4,9.5,11.9,16,21.2
+                    <path fill="url(#heartGrad)" d="M23.6,0c-3.4,0-6.3,2.7-7.6,5.6C14.7,2.7,11.8,0,8.4,0C3.8,0,0,3.8,0,8.4c0,9.4,9.5,11.9,16,21.2
                     c6.1-9.3,16-12.1,16-21.2C32,3.8,28.2,0,23.6,0z"/>
                 </svg>
+                <!-- PERFECTLY OVERLAID 19 IN THE LOBULE EXTREMITY -->
+                <div class="heart-text-overlay">19</div>
             </div>
             
-            <!-- Happy Birthday Baby written in formal Mathematical notation -->
             <div class="math-title">
                 $$\mathbf{\left[ \text{HAPPY BIRTHDAY BABY!} \right]_{t \to \infty}}$$
             </div>
@@ -241,55 +348,123 @@
     </div>
 
     <script>
+        // Mathematical floaters pool
+        const mathFormulas = [
+            '\\int e^x dx = e^x', '\\lim_{t \\to \\infty} Love = \\infty', 'x^2 + y^2 = 19', 
+            'f(x) = 3x - 12', '\\nabla \\times \\vec{E}', 'e^{i\\pi} + 1 = 0', 'dy/dx', 
+            '\\sum_{n=1}^{\\infty} \\frac{1}{n^2}', '\\delta_{ij}', '\\beta_{19}'
+        ];
+
+        function createDriftingMath() {
+            const mathLoader = document.getElementById('mathLoader');
+            const formula = mathFormulas[Math.floor(Math.random() * mathFormulas.length)];
+            const span = document.createElement('span');
+            span.className = 'math-drift';
+            span.innerHTML = `\\(${formula}\\)`;
+            span.style.top = Math.random() * 100 + 'vh';
+            span.style.left = Math.random() * 100 + 'vw';
+            span.style.transform = `scale(${0.7 + Math.random() * 0.7})`;
+            mathLoader.appendChild(span);
+            
+            // Format newly generated item with MathJax dynamically
+            MathJax.typesetPromise([span]);
+            
+            // Fade out and disappear
+            setTimeout(() => {
+                span.style.transition = "opacity 2s";
+                span.style.opacity = 0;
+                setTimeout(() => span.remove(), 2000);
+            }, 1500);
+        }
+
         function checkAnswer() {
             const answer = document.getElementById('mathAnswer').value;
             const errorMsg = document.getElementById('error-msg');
             const puzzleArea = document.getElementById('puzzle-area');
             const secretMessage = document.getElementById('secretMessage');
             const container = document.getElementById('cardContainer');
+            const loader = document.getElementById('mathLoader');
+            const loaderBar = document.getElementById('loaderBar');
+            const loaderStatus = document.getElementById('loaderStatus');
 
-            // Golden Answer = 19
             if (parseInt(answer) === 19) {
                 errorMsg.style.display = 'none';
                 
-                // Animate Container to expand beautifully for the reveal
-                container.style.transform = "scale(1.03)";
-                
-                // Hide puzzle
-                puzzleArea.style.display = 'none';
-                
-                // Reveal secret payload
-                secretMessage.style.display = 'block';
-                setTimeout(() => {
-                    secretMessage.style.opacity = '1';
-                    // Re-trigger MathJax to process the new math formula title correctly
-                    MathJax.typesetPromise();
-                }, 50);
+                // 1. Hide main container view & show futuristic loader
+                container.style.display = 'none';
+                loader.style.display = 'flex';
 
-                // Burst gorgeous romantic pink, red, and gold confetti
-                var duration = 4 * 1000;
-                var end = Date.now() + duration;
+                // 2. Spawn drifting math icons dynamically
+                const driftingSpans = setInterval(createDriftingMath, 450);
 
-                (function frame() {
-                  confetti({
-                    particleCount: 4,
-                    angle: 60,
-                    spread: 60,
-                    origin: { x: 0 },
-                    colors: ['#ff4d6d', '#ff758f', '#ff8fa3', '#ffd166']
-                  });
-                  confetti({
-                    particleCount: 4,
-                    angle: 120,
-                    spread: 60,
-                    origin: { x: 1 },
-                    colors: ['#ff4d6d', '#ff758f', '#ff8fa3', '#ffd166']
-                  });
+                // 3. Initiate 5-Second Custom Timeline
+                const duration = 5000; 
+                const interval = 50; 
+                let timePassed = 0;
 
-                  if (Date.now() < end) {
-                    requestAnimationFrame(frame);
-                  }
-                }());
+                const progressInterval = setInterval(() => {
+                    timePassed += interval;
+                    const percent = (timePassed / duration) * 100;
+                    loaderBar.style.width = percent + '%';
+
+                    // Mathematical Status Changes dynamically updated in real-time
+                    if (timePassed < 1500) {
+                        loaderStatus.innerText = "[CALIBRATING AFFECTION VECTORS...]";
+                    } else if (timePassed < 3000) {
+                        loaderStatus.innerText = "[INTEGRATING ROMANTIC VARIABLES OVER BARS...]";
+                    } else if (timePassed < 4500) {
+                        loaderStatus.innerText = "[COMPLETE: PERFECT CONSTANT x = 19 CONFIRMED]";
+                    } else {
+                        loaderStatus.innerText = "[RENDERING UNIVERSE IN 19 DIMENSIONS...]";
+                    }
+
+                    if (timePassed >= duration) {
+                        clearInterval(progressInterval);
+                        clearInterval(driftingSpans);
+
+                        // Fade out full-screen loader beautifully
+                        loader.style.transition = 'opacity 0.6s ease-in-out';
+                        loader.style.opacity = '0';
+
+                        setTimeout(() => {
+                            loader.style.display = 'none';
+                            
+                            // Re-enable original container
+                            container.style.display = 'block';
+                            puzzleArea.style.display = 'none';
+                            secretMessage.style.display = 'block';
+                            
+                            setTimeout(() => {
+                                secretMessage.style.opacity = '1';
+                                MathJax.typesetPromise();
+                            }, 50);
+
+                            // Burst custom heart colored confetti
+                            const endConfetti = Date.now() + 3000;
+                            (function frame() {
+                              confetti({
+                                particleCount: 5,
+                                angle: 60,
+                                spread: 60,
+                                origin: { x: 0 },
+                                colors: ['#ff4d6d', '#ff758f', '#ff8fa3', '#ffd166']
+                              });
+                              confetti({
+                                particleCount: 5,
+                                angle: 120,
+                                spread: 60,
+                                origin: { x: 1 },
+                                colors: ['#ff4d6d', '#ff758f', '#ff8fa3', '#ffd166']
+                              });
+
+                              if (Date.now() < endConfetti) {
+                                requestAnimationFrame(frame);
+                              }
+                            }());
+
+                        }, 600);
+                    }
+                }, interval);
 
             } else {
                 errorMsg.style.display = 'block';
