@@ -344,124 +344,133 @@
     </div>
 
     <script>
-        const mathFormulas = [
+        // Global variables safely declared
+        var canvas, ctx;
+        var particles = [];
+        var animationFrameId;
+        var textToForm = ["HAPPY BIRTHDAY", "BABY!"];
+        var glyphs = ['1', '9', '0', '8', 'π', 'e', '∫', '√', 'x', 'y', '∞', '+', '='];
+        var mathFormulas = [
             '\\int e^x dx = e^x', '\\lim_{t \\to \\infty} Love = \\infty', 'x^2 + y^2 = 19', 
             'f(x) = 3x - 12', '\\nabla \\times \\vec{E}', 'e^{i\\pi} + 1 = 0', 'dy/dx', 
             '\\sum_{n=1}^{\\infty} \\frac{1}{n^2}', '\\delta_{ij}', '\\beta_{19}'
         ];
 
-        function createDriftingMath() {
-            const mathLoader = document.getElementById('mathLoader');
-            if (!mathLoader) return;
-            const formula = mathFormulas[Math.floor(Math.random() * mathFormulas.length)];
-            const span = document.createElement('span');
-            span.className = 'math-drift';
-            span.innerHTML = `\\(${formula}\\)`;
-            span.style.top = Math.random() * 100 + 'vh';
-            span.style.left = Math.random() * 100 + 'vw';
-            span.style.transform = `scale(${0.7 + Math.random() * 0.7})`;
-            mathLoader.appendChild(span);
-            
-            if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
-                MathJax.typesetPromise([span]).catch(() => {});
+        // Safe setup on load
+        window.addEventListener('DOMContentLoaded', function() {
+            canvas = document.getElementById('dancingNumbersCanvas');
+            if (canvas) {
+                ctx = canvas.getContext('2d');
             }
-            
-            setTimeout(() => {
-                span.style.transition = "opacity 2s";
-                span.style.opacity = 0;
-                setTimeout(() => span.remove(), 2000);
-            }, 1500);
+        });
+
+        function createDriftingMath() {
+            try {
+                var mathLoader = document.getElementById('mathLoader');
+                if (!mathLoader) return;
+                var formula = mathFormulas[Math.floor(Math.random() * mathFormulas.length)];
+                var span = document.createElement('span');
+                span.className = 'math-drift';
+                span.innerHTML = '\\(' + formula + '\\)';
+                span.style.top = (Math.random() * 100) + 'vh';
+                span.style.left = (Math.random() * 100) + 'vw';
+                span.style.transform = 'scale(' + (0.7 + Math.random() * 0.7) + ')';
+                mathLoader.appendChild(span);
+                
+                if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
+                    MathJax.typesetPromise([span]).catch(function(){});
+                }
+                
+                setTimeout(function() {
+                    span.style.transition = "opacity 2s";
+                    span.style.opacity = 0;
+                    setTimeout(function() { span.remove(); }, 2000);
+                }, 1500);
+            } catch(e) {}
         }
 
-        /* --- BACKGROUND DANCING NUMBERS TEXT SYSTEM --- */
-        const canvas = document.getElementById('dancingNumbersCanvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-        let animationFrameId;
-        const textToForm = ["HAPPY BIRTHDAY", "BABY!"];
-        const glyphs = ['1', '9', '0', '8', 'π', 'e', '∫', '√', 'x', 'y', '∞', '+', '='];
+        // Highly compatible Particle constructor
+        function MathParticle(tx, ty) {
+            this.x = window.innerWidth / 2;
+            this.y = window.innerHeight / 2;
+            this.tx = tx;
+            this.ty = ty;
+            
+            var angle = Math.random() * Math.PI * 2;
+            var speed = 10 + Math.random() * 25;
+            this.vx = Math.cos(angle) * speed;
+            this.vy = Math.sin(angle) * speed;
+            
+            this.char = glyphs[Math.floor(Math.random() * glyphs.length)];
+            this.size = 10 + Math.random() * 10;
+            
+            var colors = ['rgba(214,51,132,0.65)', 'rgba(255,117,143,0.65)', 'rgba(255,77,109,0.65)', 'rgba(255,209,102,0.65)'];
+            this.color = colors[Math.floor(Math.random() * colors.length)];
+            this.friction = 0.92; 
+            this.magneticForce = 0.001; 
+        }
+
+        MathParticle.prototype.update = function(timePassed) {
+            if (timePassed < 1500) {
+                this.vx *= this.friction;
+                this.vy *= this.friction;
+                this.x += this.vx;
+                this.y += this.vy;
+            } else if (timePassed < 5000) {
+                var progress = (timePassed - 1500) / 3500;
+                var pull = this.magneticForce * progress * 80;
+                
+                this.vx += (this.tx - this.x) * pull;
+                this.vy += (this.ty - this.y) * pull;
+                
+                this.vx *= 0.85;
+                this.vy *= 0.85;
+                
+                this.x += this.vx;
+                this.y += this.vy;
+            } else {
+                var danceFactor = 1.5;
+                this.x = this.tx + Math.sin(Date.now() * 0.004 + this.tx) * danceFactor;
+                this.y = this.ty + Math.cos(Date.now() * 0.004 + this.ty) * danceFactor;
+            }
+        };
+
+        MathParticle.prototype.draw = function() {
+            ctx.fillStyle = this.color;
+            ctx.font = 'bold ' + this.size + 'px Arial';
+            ctx.fillText(this.char, this.x, this.y);
+        };
 
         function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-
-        class MathParticle {
-            constructor(tx, ty) {
-                this.x = window.innerWidth / 2;
-                this.y = window.innerHeight / 2;
-                this.tx = tx;
-                this.ty = ty;
-                
-                const angle = Math.random() * Math.PI * 2;
-                const speed = 10 + Math.random() * 25;
-                this.vx = Math.cos(angle) * speed;
-                this.vy = Math.sin(angle) * speed;
-                
-                this.char = glyphs[Math.floor(Math.random() * glyphs.length)];
-                this.size = 10 + Math.random() * 10;
-                
-                const colors = ['rgba(214,51,132,0.65)', 'rgba(255,117,143,0.65)', 'rgba(255,77,109,0.65)', 'rgba(255,209,102,0.65)'];
-                this.color = colors[Math.floor(Math.random() * colors.length)];
-                this.friction = 0.92; 
-                this.magneticForce = 0.001; 
-            }
-
-            update(timePassed) {
-                if (timePassed < 1500) {
-                    this.vx *= this.friction;
-                    this.vy *= this.friction;
-                    this.x += this.vx;
-                    this.y += this.vy;
-                } else if (timePassed < 5000) {
-                    const progress = (timePassed - 1500) / 3500;
-                    const pull = this.magneticForce * progress * 80;
-                    
-                    this.vx += (this.tx - this.x) * pull;
-                    this.vy += (this.ty - this.y) * pull;
-                    
-                    this.vx *= 0.85;
-                    this.vy *= 0.85;
-                    
-                    this.x += this.vx;
-                    this.y += this.vy;
-                } else {
-                    const danceFactor = 1.5;
-                    this.x = this.tx + Math.sin(Date.now() * 0.004 + this.tx) * danceFactor;
-                    this.y = this.ty + Math.cos(Date.now() * 0.004 + this.ty) * danceFactor;
-                }
-            }
-
-            draw() {
-                ctx.fillStyle = this.color;
-                ctx.font = `bold ${this.size}px Arial`;
-                ctx.fillText(this.char, this.x, this.y);
+            if (canvas) {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
             }
         }
 
         function buildLetters() {
             resizeCanvas();
-            const tempCanvas = document.createElement('canvas');
-            const tempCtx = tempCanvas.getContext('2d');
-            tempCanvas.width = canvas.width;
-            tempCanvas.height = canvas.height;
+            var tempCanvas = document.createElement('canvas');
+            var tempCtx = tempCanvas.getContext('2d');
+            tempCanvas.width = window.innerWidth;
+            tempCanvas.height = window.innerHeight;
 
             tempCtx.fillStyle = '#000';
-            const size = Math.min(canvas.width / 11, 75); 
-            tempCtx.font = `900 ${size}px Cambria, serif`;
+            var size = Math.min(window.innerWidth / 11, 75); 
+            tempCtx.font = '900 ' + size + 'px Cambria, serif';
             tempCtx.textAlign = 'center';
             tempCtx.textBaseline = 'middle';
 
-            tempCtx.fillText(textToForm[0], canvas.width / 2, canvas.height / 2 - size);
-            tempCtx.fillText(textToForm[1], canvas.width / 2, canvas.height / 2 + size * 0.6);
+            tempCtx.fillText(textToForm[0], window.innerWidth / 2, window.innerHeight / 2 - size);
+            tempCtx.fillText(textToForm[1], window.innerWidth / 2, window.innerHeight / 2 + size * 0.6);
 
-            const imgData = tempCtx.getImageData(0, 0, canvas.width, canvas.height);
+            var imgData = tempCtx.getImageData(0, 0, window.innerWidth, window.innerHeight);
             particles = [];
 
-            const step = Math.max(10, Math.floor(canvas.width / 110)); 
-            for (let y = 0; y < canvas.height; y += step) {
-                for (let x = 0; x < canvas.width; x += step) {
-                    const index = (y * canvas.width + x) * 4;
+            var step = Math.max(10, Math.floor(window.innerWidth / 110)); 
+            for (var y = 0; y < window.innerHeight; y += step) {
+                for (var x = 0; x < window.innerWidth; x += step) {
+                    var index = (y * window.innerWidth + x) * 4;
                     if (imgData.data[index + 3] > 128) {
                         particles.push(new MathParticle(x, y));
                     }
@@ -471,70 +480,62 @@
 
         function runEngine(startTime) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            const timePassed = Date.now() - startTime;
+            var timePassed = Date.now() - startTime;
 
-            for (let i = 0; i < particles.length; i++) {
+            for (var i = 0; i < particles.length; i++) {
                 particles[i].update(timePassed);
                 particles[i].draw();
             }
 
-            animationFrameId = requestAnimationFrame(() => runEngine(startTime));
+            animationFrameId = requestAnimationFrame(function() {
+                runEngine(startTime);
+            });
         }
 
         function checkAnswer() {
-            const answer = document.getElementById('mathAnswer').value;
-            const errorMsg = document.getElementById('error-msg');
-            const puzzleArea = document.getElementById('puzzle-area');
-            const secretMessage = document.getElementById('secretMessage');
-            const container = document.getElementById('cardContainer');
-            const loader = document.getElementById('mathLoader');
-            const loaderBar = document.getElementById('loaderBar');
-            const loaderStatus = document.getElementById('loaderStatus');
+            try {
+                var answerInput = document.getElementById('mathAnswer');
+                var answer = answerInput ? answerInput.value : '';
+                var errorMsg = document.getElementById('error-msg');
+                var puzzleArea = document.getElementById('puzzle-area');
+                var secretMessage = document.getElementById('secretMessage');
+                var container = document.getElementById('cardContainer');
+                var loader = document.getElementById('mathLoader');
+                var loaderBar = document.getElementById('loaderBar');
+                var loaderStatus = document.getElementById('loaderStatus');
 
-            if (parseInt(answer) === 19) {
-                errorMsg.style.display = 'none';
-                
-                container.style.display = 'none';
-                loader.style.display = 'flex';
+                if (parseInt(answer) === 19) {
+                    if (errorMsg) errorMsg.style.display = 'none';
+                    
+                    if (container) container.style.display = 'none';
+                    if (loader) loader.style.display = 'flex';
 
-                const driftingSpans = setInterval(createDriftingMath, 450);
+                    var driftingSpans = setInterval(createDriftingMath, 450);
 
-                const duration = 5000; 
-                const interval = 50; 
-                let timePassed = 0;
+                    var duration = 5000; 
+                    var interval = 50; 
+                    var timePassed = 0;
 
-                const progressInterval = setInterval(() => {
-                    timePassed += interval;
-                    const percent = (timePassed / duration) * 100;
-                    if (loaderBar) loaderBar.style.width = percent + '%';
+                    var progressInterval = setInterval(function() {
+                        timePassed += interval;
+                        var percent = (timePassed / duration) * 100;
+                        if (loaderBar) loaderBar.style.width = percent + '%';
 
-                    if (loaderStatus) {
-                        if (timePassed < 1500) {
-                            loaderStatus.innerText = "[CALIBRATING AFFECTION VECTORS...]";
-                        } else if (timePassed < 3000) {
-                            loaderStatus.innerText = "[INTEGRATING ROMANTIC VARIABLES OVER BARS...]";
-                        } else if (timePassed < 4500) {
-                            loaderStatus.innerText = "[COMPLETE: PERFECT CONSTANT x = 19 CONFIRMED]";
-                        } else {
-                            loaderStatus.innerText = "[RENDERING UNIVERSE IN 19 DIMENSIONS...]";
+                        if (loaderStatus) {
+                            if (timePassed < 1500) {
+                                loaderStatus.innerText = "[CALIBRATING AFFECTION VECTORS...]";
+                            } else if (timePassed < 3000) {
+                                loaderStatus.innerText = "[INTEGRATING ROMANTIC VARIABLES OVER BARS...]";
+                            } else if (timePassed < 4500) {
+                                loaderStatus.innerText = "[COMPLETE: PERFECT CONSTANT x = 19 CONFIRMED]";
+                            } else {
+                                loaderStatus.innerText = "[RENDERING UNIVERSE IN 19 DIMENSIONS...]";
+                            }
                         }
-                    }
 
-                    if (timePassed >= duration) {
-                        clearInterval(progressInterval);
-                        clearInterval(driftingSpans);
+                        if (timePassed >= duration) {
+                            clearInterval(progressInterval);
+                            clearInterval(driftingSpans);
 
-                        loader.style.transition = 'opacity 0.6s ease-in-out';
-                        loader.style.opacity = '0';
-
-                        setTimeout(() => {
-                            loader.style.display = 'none';
-                            
-                            document.getElementById('dancingNumbersCanvas').style.display = 'block';
-                            buildLetters();
-                            
-                            const engineStartTime = Date.now();
-                            runEngine(engineStartTime);
-
-                            container.style.display = 'block';
-                            puzzleArea.style.display = 'n
+                            if (loader) {
+                                loader.style.transition
