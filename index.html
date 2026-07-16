@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>f(t) = Love ❤️</title>
+    <!-- MathJax for rendering gorgeous math equations -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            /* Cartesian grid background */
+            background-color: #fafafa;
+            background-image: 
+                linear-gradient(to right, rgba(0,0,0,0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0,0,0,0.05) 1px, transparent 1px);
+            background-size: 20px 20px;
+            font-family: 'Cambria', 'Georgia', serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        /* Axis lines to represent the origin (0,0) */
+        .axis-x {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background-color: rgba(0,0,0,0.1);
+            top: 50%;
+            left: 0;
+            z-index: 0;
+        }
+        .axis-y {
+            position: absolute;
+            width: 2px;
+            height: 100%;
+            background-color: rgba(0,0,0,0.1);
+            left: 50%;
+            top: 0;
+            z-index: 0;
+        }
+        .container {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 1px solid #ddd;
+            max-width: 450px;
+            width: 90%;
+        }
+        h1 {
+            color: #222;
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+        .equation-box {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 5px solid #d63384;
+            text-align: center;
+        }
+        .input-group {
+            margin: 20px 0;
+        }
+        p {
+            color: #555;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+        /* Interactive Input */
+        .math-input {
+            width: 80px;
+            padding: 8px;
+            font-size: 1.1rem;
+            text-align: center;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            margin: 0 10px;
+            font-family: monospace;
+        }
+        .math-input:focus {
+            outline: none;
+            border-color: #d63384;
+        }
+        .btn {
+            background-color: #d63384;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background-color: #b01a5f;
+        }
+        /* Hidden Message Panel */
+        #secretMessage {
+            display: none;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px dashed #ccc;
+        }
+        .love-letter {
+            font-style: italic;
+            color: #333;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+        .signature {
+            font-weight: bold;
+            color: #d63384;
+            font-size: 1.2rem;
+        }
+        /* Mathematical Heart Vector */
+        .heart-svg {
+            width: 100px;
+            height: 100px;
+            fill: #ff4d6d;
+            margin: 0 auto 15px auto;
+            display: none;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Coordinate Plane Axis Visuals -->
+    <div class="axis-x"></div>
+    <div class="axis-y"></div>
+
+    <div class="container">
+        <h1>An Elegant Proof of My Love</h1>
+        <p>Solve the system where $x^2 + y^2 = 1$ to unlock the limit of my affection.</p>
+        
+        <!-- Beautiful parametric heart equation rendered in LaTeX -->
+        <div class="equation-box">
+            $$x = 16\sin^3(t)$$
+            $$y = 13\cos(t) - 5\cos(2t) - 2\cos(3t) - \cos(4t)$$
+            <p style="font-size: 0.85rem; color: #777; margin-top: 8px;">(The Parametric Heart Curve)</p>
+        </div>
+
+        <!-- The "Puzzle" for her to solve -->
+        <div id="puzzle-area">
+            <p>Define the domain of our happiness over a single standard period:</p>
+            <div class="input-group">
+                $$t \in [0, \text{?}\pi]$$
+                <input type="number" id="mathAnswer" class="math-input" placeholder="Value" step="any">
+            </div>
+            <button class="btn" onclick="checkAnswer()">Evaluate Limit</button>
+            <p id="error-msg" style="color: red; font-size: 0.9rem; margin-top: 10px; display: none;">Error: Value does not satisfy the boundary conditions. Try again!</p>
+        </div>
+
+        <!-- The Secret Birthday Message -->
+        <div id="secretMessage">
+            <!-- Heart Curve Visual -->
+            <svg class="heart-svg" id="heartSvg" viewBox="0 0 32 29.6">
+                <path d="M23.6,0c-3.4,0-6.3,2.7-7.6,5.6C14.7,2.7,11.8,0,8.4,0C3.8,0,0,3.8,0,8.4c0,9.4,9.5,11.9,16,21.2
+                c6.1-9.3,16-12.1,16-21.2C32,3.8,28.2,0,23.6,0z"/>
+            </svg>
+            
+            <p class="love-letter">
+                "Theorem 1: You are the constant in my chaotic variables. <br><br>
+                Just like the interval $[0, 2\pi]$ beautifully completes the heart curve, you perfectly complete my world. Happy Birthday, my love! I hope your day is filled with infinite joy."
+            </p>
+            <p class="signature">Yours, [Mj Pogi] ❤️</p>
+        </div>
+    </div>
+
+    <script>
+        function checkAnswer() {
+            const answer = document.getElementById('mathAnswer').value;
+            const errorMsg = document.getElementById('error-msg');
+            const puzzleArea = document.getElementById('puzzle-area');
+            const secretMessage = document.getElementById('secretMessage');
+            const heart = document.getElementById('heartSvg');
+
+            // The answer to complete a standard single period of a sin/cos curve is 2 (for 2*pi)
+            if (parseFloat(answer) === 2) {
+                errorMsg.style.display = 'none';
+                
+                // Hide puzzle
+                puzzleArea.style.display = 'none';
+                
+                // Reveal message with style
+                secretMessage.style.display = 'block';
+                heart.style.display = 'block';
+                setTimeout(() => {
+                    secretMessage.style.opacity = '1';
+                }, 50);
+
+                // Burst math confetti (pink/red stars and circles)
+                var duration = 3 * 1000;
+                var end = Date.now() + duration;
+
+                (function frame() {
+                  confetti({
+                    particleCount: 3,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: ['#ff4d6d', '#ff758f', '#ff8fa3']
+                  });
+                  confetti({
+                    particleCount: 3,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: ['#ff4d6d', '#ff758f', '#ff8fa3']
+                  });
+
+                  if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                  }
+                }());
+
+            } else {
+                errorMsg.style.display = 'block';
+                errorMsg.innerText = "Error: Value does not satisfy the boundary conditions. Hint: What's the fundamental period of sine and cosine?";
+            }
+        }
+    </script>
+</body>
+      </html>
+
